@@ -2,10 +2,9 @@ name: JW
 bio: '努力码代码，带你抓娃娃'
 picture: 'assets/images/profile.jpg'
 
-#url: http://sergiokopplin.github.io/indigo
-# url: http://jackwee.github.com/JWBlog
-url: http://127.0.0.1:4000/
-# your url: http://USERNAME.github.io/
+url: http://jackwee.github.com/JWBlog
+# url: http://127.0.0.1:4000/
+
 permalink: /:title/
 
 analytics: 'UA-MYANALYTICS'
