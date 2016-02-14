@@ -2,7 +2,7 @@
 title: "Qt中关于JavaScript/QML和C++混合编程"
 layout: post
 date: 2014-08-03 14:26
-tag:[qt JavaScript C++ 混合编程]
+tag: markdown
 #star: true
 ---
  `版权声明：本文为博主原创文章，未经博主允许不得转载。`
@@ -34,20 +34,19 @@ Qt中关于JavaScript/QML和C++混合编程
 [vc如何返回函数结果及压栈参数](http://blog.csdn.net/soloist/article/details/1267147)
 
 
-1、前传
-
-```
- “不同语言之间进行混合编程是计算机领域一个火热的话题，一些软件技术和工具，如SWIG (Simplified Wrapper and Interface Generator)、COM(Component Object Model) 的目的就是为了解决不同语言之间的互通性。”
+###1、前传
+<pre>
+<code>
+“不同语言之间进行混合编程是计算机领域一个火热的话题，一些软件技术和工具，如SWIG (Simplified Wrapper and Interface Generator)、COM(Component Object Model) 的目的就是为了解决不同语言之间的互通性。”
 
 
   “对于不同语言之间的互操作，主要解决三大问题：
-
+  
 （1）数据类型的识别（包括数据的存储格式，访问方式）。
 
 （2）数据类型的转换（类型系统如何互通）。
 
 （3）对象生命周期管理。”
-
 
 “说到不同编程语言的混合调用，就涉及到两种语言之间数据类型的互通，方法的调用，本质上就是要求两种语言能够互相通信，打个比方，这就好比两个国家之间的语言进行沟通，例如阳阳会讲日语，龙龙会讲法语，那么他们怎么才能进行沟通呢？一种方式是他们采用一种双方都能听懂的英语来沟通，另一种方式就是阳阳学会了说法语，龙龙学会了说日语。”
 
@@ -56,13 +55,12 @@ Qt中关于JavaScript/QML和C++混合编程
 
 
 “说到为什么要进行js与c++的混合开发，原因是他们各有自己的优缺点。js的对象模型比较灵活，支持对象属性的动态创建和删除，支持闭包，但是性能不如c++高，而且局限于浏览器，否则需要有js引擎的支持。c++的优点就是性能比较高，但是是一门静态类型语言，灵活性不足。结合二者的优点，我们可以将逻辑代码部分采用js来实现，大量计算部分采用c++来实现。”
-
-```
-
-
+</code>
+</pre>
 
 
-2、Qt的对象模型的介绍
+
+###2、Qt的对象模型的介绍
 
  C++的静态特性不够灵活，为了满足GUI编程对运行时高效性和灵活性的要求，Qt对标准C++对象模型进行了扩展（http://qt-project.org/doc/qt-5/object.html），这些扩展都基于了Qt中两个十分重要的两个概念：
 
@@ -95,7 +93,7 @@ The meta-object system is based on three things:
 
 
 
-3、JS调用C++
+###3、JS调用C++
 
 我想这就是FFI中所说的，“In most cases, a FFI is defined by a "higher-level" language, so that it may employ services defined and implemented in a lower level language, typically a systems language like C or C++. ”
 
@@ -104,9 +102,8 @@ The meta-object system is based on three things:
 Qt中，JS访问C++有两种方式：
 
 (1)一种是将自定义的C++类型注册到QML的类型系统中。
-
-
-```
+<pre>
+<code>
 class MyClass : public QObject//注意：必须要求是QObject派生的类  
 {  
     Q_OBJECT //为了使用Meta-Object System，这个宏是必须的  
@@ -118,16 +115,22 @@ public:
 private:  
     int m_name;  
 };  
+</code>
+</pre>
+
+<pre>
+<code>
+qmlRegisterType&lt;MyClass&gt;(“mytype”, 1, 0, “MyClass”);//将MyClass注册到QML的类型系统中，以便在qml中使用该类型。  
+</code>
+</pre>
 
 
-```
-
-```
-qmlRegisterType<MyClass>(“mytype”, 1, 0, “MyClass”);//将MyClass注册到QML的类型系统中，以便在qml中使用该类型。  
-```
 
 
-```
+
+
+<pre>
+<code>
 //a.直接在qml文件中创建元素  
 import QtQuick 2.2  
 import mytype 1.0  
@@ -157,19 +160,22 @@ MyClass{
     name:”longlong-yangyang”  
 }  
 var myObj = Qt.createComponent("myclass.qml");  
-```
+</code>
+</pre>
 
 
 
 
 (2)另一种是将c++中定义的对象放到js的全局变量中。
 
+<pre>
+<code>
 
-```
 QQmlApplicationEngine engine;  
 MyClass object;//在C++代码中定义对象object  
 engine.rootContext()->setContextProperty("myObj", &object);//将object挂到QML engine的上下文中，这样在任何QML文件中，都可以通过myObj.property和myObj.method()的方式访问myObj了。不过这种方式的性能是比较低。  
-```
+</code>
+</pre>
 
 “Note: Since all expressions evaluated in QML are evaluated in a particular context, if the context is modified, all bindings in that context will be re-evaluated. Thus, context properties should be used with care outside of application initialization, as this may lead to decreased application performance.”——http://qt-project.org/doc/qt-5/qtqml-cppintegration-contextproperties.html
 
@@ -183,16 +189,19 @@ Javascript访问c++属于脚本语言对静态语言的调用范畴，那么涉�
 
 a.c文件中定义了add方法，如下:
 
-```
+<pre>
+<code>
 //a.c  
 int add(int a, int b){  
     return a+b;  
 }  
-```
+</code>
+</pre>
 
 为了能让lua中调用到c函数，lua要求提供一个wrap文件，对add函数进行包装，这里定义到wrap_a.c文件中，如下：
 
-```
+<pre>
+<code>
 //wrap_a.c，这里还是c文件  
     int wrap_add(LuaState* L){  
         int tmp1 = Lua_checkValueInt(L,1);  
@@ -201,7 +210,8 @@ int add(int a, int b){
         Lua_pushValue(L,result);  
         return 1;  
     }  
-```
+</code>
+</pre>
 
 Lua规定，wrap函数的参数是LuaState*这样一个参数，这里就是lua中实现的c的调用过程，在调用wrap函数时，会分配一个LuaState（可以理解为一个栈），将参数放到LuaState中(压栈过程)，在wrap_add函数中，从LuaState取到参数并检查类型，最后将返回值压栈并返回返回值个数（Lua中支持多个返回值）。
 
@@ -217,13 +227,14 @@ Lua规定，wrap函数的参数是LuaState*这样一个参数，这里就是lua�
 
 对象是采用C++中的类创建的，也是按照C++的数据存储格式存储的，JavaScript要想去访问，就必须要了解这一切，才能够认识C++中的数据，进而才能做数据类型转换的事情。那么JavaScript如何才能知道这些呢？答案只有一个：Meta-Object System。想想为了让JS能够认识C++的类型，我们做了什么？类必须由QObject继承而来，类中必须使用Q_OBJECT宏，如果想要在QML中使用该类型还必须调用qmlRegisterType进行类型注册，这一切都是为了让JS引擎更懂我们定义的类型，也就是让JS引擎知道我们定义类型的元信息，有了元信息，Qt就可以帮我们做很多像Lua要求c做的事情，而这些都不需要用户来操心了。
 
-4、C++ 调用 JS
+###4、C++ 调用 JS
 
 我想这又是FFI中所说的，“Many FFIs also provide the means for the called language to invoke services in the host language as well.”
 
 Qt中，C++创建JS的对象的方式如下:   
 
-```
+<pre>
+<code>
 // Using QQmlComponent  
    QQmlEngine engine;  
    QQmlComponent component(&engine,  
@@ -232,21 +243,28 @@ Qt中，C++创建JS的对象的方式如下:
    ...  
    delete object;  
 
-```
+</code>
+</pre>
 
-```
+<pre>
+<code>
+
 //读写属性  
 rx2 = object->property(“qmlObjProperty");  
 object->setProperty("qmlObjProperty", wx2);  
-```
+</code>
+</pre>
 
+
+
+<pre>
+<code>
 //调用方法
-
-```
 QMetaObject::invokeMethod(object, "myMethodInt",  
                        Q_RETURN_ARG(QVariant, returnedValue),  
                        Q_ARG(QVariant,100));  
-```
+</code>
+</pre>
 
 C++去操作JavaScript，也需要关心类似的事情：类型的识别，类型的转换。
 
@@ -265,7 +283,7 @@ QML中的对象的类型分为两种：
 
 
 
-##补充：关于JavaScript调用C++定义函数的参数传递
+###补充：关于JavaScript调用C++定义函数的参数传递
 
 关于Qt中JavaScript和C++混合调用参数的内部的自动类型转换，可以参考:http://qt-project.org/doc/qt-5/qtqml-cppintegration-data.html，这里我们只探讨js中定义的对象作为参数传递给c++时的情况。
 
@@ -273,18 +291,23 @@ QML中的对象的类型分为两种：
 
 调用方式：
 
-```
+<pre>
+<code>
+
 cOjb.foo(param);//其中cObj为C++类型的对象（如上文描述，该对象可能是在c代码中创建然后挂在js的全局上下文中供js访问，也可能是在js中创建）  
-```
+</code>
+</pre>
 
 
 C++中函数定义方式：
 
-```
-void MyClass::foo(<Type> cParam){  
+<pre>
+<code>
+void MyClass::foo(&lt;Type&gt; cParam){  
 //do something  
 }  
-```
+</code>
+</pre>
 
 分为以下几种情况：
 

@@ -867,3 +867,7 @@ footer p a {
 .pagination .hidden {
   visibility: hidden;
 }
+
+.image-wrapper {
+    text-align: center;
+}
